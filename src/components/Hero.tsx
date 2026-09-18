@@ -1,9 +1,29 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { Component, type ErrorInfo, type ReactNode, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Float, Stars, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
+
+class SceneErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('The 3D hero scene could not start.', error, info);
+  }
+
+  render() {
+    if (this.state.failed) {
+      return <div className="h-full w-full bg-[radial-gradient(circle_at_50%_35%,#0b5275_0%,#001f3f_45%,#050505_100%)]" />;
+    }
+
+    return this.props.children;
+  }
+}
 
 /* ── 3D Ocean Plane ── */
 function Ocean() {
@@ -287,13 +307,15 @@ export default function Hero() {
     <section id="hero" ref={heroRef} className="relative w-full h-screen overflow-hidden">
       {/* 3D Background */}
       <div className="absolute inset-0 z-0">
-        <Canvas
-          camera={{ position: [0, 3, 12], fov: 55 }}
-          dpr={[1, 2]}
-          gl={{ antialias: true, alpha: true }}
-        >
-          <Scene />
-        </Canvas>
+        <SceneErrorBoundary>
+          <Canvas
+            camera={{ position: [0, 3, 12], fov: 55 }}
+            dpr={[1, 2]}
+            gl={{ antialias: true, alpha: true }}
+          >
+            <Scene />
+          </Canvas>
+        </SceneErrorBoundary>
       </div>
 
       {/* Dramatic Gradient Overlay */}

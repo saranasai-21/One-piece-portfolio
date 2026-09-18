@@ -174,7 +174,6 @@ export function ArmamentHakiGlow() {
     return () => {
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMove);
-      cancelAnimationFrame(animate as unknown as FrameRequestCallback);
       cancelAnimationFrame(animationId);
     };
   }, []);
